@@ -296,13 +296,20 @@ type_qualifier
 declarator
 	: pointer direct_declarator
 	| direct_declarator
+	| pointer array_direct_declarator
+	| array_direct_declarator
 	;
+
+array_direct_declarator
+	: IDENTIFIER dim 				{  makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
+
+dim
+	: '[' constant_expression ']'  {dim_count = 1; }
+	| dim '[' constant_expression ']' {dim_count++;}
 
 direct_declarator
 	: IDENTIFIER 						{  checkDeclaration(tablePtr,lineCount,scopeCount);}
-	| '(' declarator ')' 					{  makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
-	| direct_declarator '[' constant_expression ']' 	{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
-	| direct_declarator '[' ']' 				{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
+	| '(' declarator ')'					{  makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
 	| direct_declarator '(' parameter_type_list ')' 	{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
 	| direct_declarator '(' identifier_list ')' 		{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
 	| direct_declarator '(' ')' 				{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
@@ -351,20 +358,23 @@ abstract_declarator
 	: pointer
 	| direct_abstract_declarator
 	| pointer direct_abstract_declarator
+	| array_direct_abstract_declarator
+	| pointer array_direct_abstract_declarator
 	;
 
-direct_abstract_declarator
-	: '(' abstract_declarator ')' 					{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
-	| '[' ']' 							{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
+array_direct_abstract_declarator
+	: '[' ']' 							{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
 	| '[' constant_expression ']' 					{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
 	| direct_abstract_declarator '[' ']' 				{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
 	| direct_abstract_declarator '[' constant_expression ']' 	{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
+
+direct_abstract_declarator
+	: '(' abstract_declarator ')' 					{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
 	| '(' ')' 							{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
 	| '(' parameter_type_list ')' 					{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
 	| direct_abstract_declarator '(' ')' 				{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
 	| direct_abstract_declarator '(' parameter_type_list ')' 	{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
 	;
-
 initializer
 	: assignment_expression {$$=$1;}
 	| '{' initializer_list '}'
