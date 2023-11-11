@@ -17,8 +17,8 @@ extern int arrayIndexErr;
 
 
 
-
 char *sourceCode=NULL;
+int dim_count=0;
 int errorFlag=0;
 void makeList(char *,char,int);
 %}
@@ -183,10 +183,6 @@ expression
 	| expression ',' assignment_expression { makeList(",", 'p', lineCount); }
 	;
 
-constant_expression
-	: conditional_expression
-	;
-
 declaration
 	: declaration_specifiers ';' 			  { makeList(";", 'p', lineCount);typeBuffer=' '; }
 	| declaration_specifiers init_declarator_list ';' { makeList(";", 'p', lineCount); typeBuffer=' ';}
@@ -268,8 +264,8 @@ struct_declarator_list
 
 struct_declarator
 	: declarator
-	| ':' constant_expression 		{ makeList(":", 'p', lineCount); }
-	| declarator ':' constant_expression 	{ makeList(":", 'p', lineCount); }
+	| ':' conditional_expression 		{ makeList(":", 'p', lineCount); }
+	| declarator ':' conditional_expression 	{ makeList(":", 'p', lineCount); }
 	;
 
 enum_specifier
@@ -285,7 +281,7 @@ enumerator_list
 
 enumerator
 	: IDENTIFIER 				{ makeList(tablePtr, 'v', lineCount); }
-	| IDENTIFIER '=' constant_expression 	{ makeList("=", 'o', lineCount); makeList("tablePtr", 'v', lineCount); }
+	| IDENTIFIER '=' conditional_expression 	{ makeList("=", 'o', lineCount); makeList("tablePtr", 'v', lineCount); }
 	;
 
 type_qualifier
@@ -304,8 +300,8 @@ array_direct_declarator
 	: IDENTIFIER dim 				{  makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
 
 dim
-	: '[' constant_expression ']'  {dim_count = 1; }
-	| dim '[' constant_expression ']' {dim_count++;}
+	: '[' conditional_expression ']'  {dim_count = 1; }
+	| dim '[' conditional_expression ']' {dim_count++;}
 
 direct_declarator
 	: IDENTIFIER 						{  checkDeclaration(tablePtr,lineCount,scopeCount);}
@@ -364,9 +360,9 @@ abstract_declarator
 
 array_direct_abstract_declarator
 	: '[' ']' 							{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
-	| '[' constant_expression ']' 					{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
+	| '[' conditional_expression ']' 					{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
 	| direct_abstract_declarator '[' ']' 				{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
-	| direct_abstract_declarator '[' constant_expression ']' 	{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
+	| direct_abstract_declarator '[' conditional_expression ']' 	{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
 
 direct_abstract_declarator
 	: '(' abstract_declarator ')' 					{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
@@ -397,7 +393,7 @@ statement
 
 labeled_statement
 	: IDENTIFIER ':' statement  			{ makeList(tablePtr, 'v', lineCount);  }
-	| CASE constant_expression ':'  statement 	{ makeList(":", 'p', lineCount); makeList("case", 'k', lineCount);}
+	| CASE conditional_expression ':'  statement 	{ makeList(":", 'p', lineCount); makeList("case", 'k', lineCount);}
 	| DEFAULT ':' statement 			{ makeList(":", 'p', lineCount); makeList("default", 'k', lineCount); }
 	;
 
